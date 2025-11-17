@@ -7,3 +7,9 @@ canonifyURLs = true
 
 [permalinks]
 posts = "/:slug/"
+
+[menu]
+  [[menu.main]]
+    name = "블로그"
+    url = "/"
+    weight = 1
