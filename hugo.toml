@@ -5,21 +5,42 @@ theme = "PaperMod"
 relativeURLs = false
 canonifyURLs = true
 
+[params.profileMode]
+enabled = true
+title = "신승환"
+subtitle = "고려대학교 인공지능사이버보안학과 25학번"
+imageUrl = "https://www.korea.ac.kr/sites/ko/images/contents/emblem_1.png"
+imageWidth = 200
+imageHeight = 200
+
+[[params.profileMode.buttons]]
+name = "Blog"
+url = "/posts/"
+
+[[params.profileMode.buttons]]
+name = "Archive"
+url = "/archive/"
+
+[[params.profileMode.buttons]]
+name = "Github"
+url = "https://github.com/"
+
 [permalinks]
 posts = "/:slug/"
 
 [menu]
-  [[menu.main]]
-    name = "Home"
-    url = "/"
-    weight = 1
 
   [[menu.main]]
-    name = "Blog"
-    url = "/posts/"
-    weight = 2
+  name = "Home"
+  url = "/"
+  weight = 1
 
   [[menu.main]]
-    name = "Archive"
-    url = "/archive/"
-    weight = 3
+  name = "Blog"
+  url = "/posts/"
+  weight = 2
+
+  [[menu.main]]
+  name = "Archive"
+  url = "/archive/"
+  weight = 3
