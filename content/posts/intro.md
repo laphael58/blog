@@ -1,6 +1,6 @@
 +++
 date = '2025-11-17T22:54:08+09:00'
-draft = true
+draft = false
 title = '블로그 소개'
 +++
 
