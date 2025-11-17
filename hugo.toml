@@ -1,0 +1,4 @@
+baseURL = "https://ku_ssh.github.io/"
+languageCode = "ko-kr"
+title = "Hack-and-Grow"
+theme = "PaperMod"
