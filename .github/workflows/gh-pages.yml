@@ -1,32 +1,27 @@
-name: GitHub Pages Deploy
+name: Deploy Hugo to Pages
 
 on:
   push:
     branches:
-      - main
+      - main  # 소스 레포 main 브랜치에 push하면 실행
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v3
-      with:
-        submodules: true
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
 
-    - name: Setup Hugo
-      uses: peaceiris/actions-hugo@v2
-      with:
-        hugo-version: '0.152.2'
+      - uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.152.2'
 
-    - name: Build
-      run: hugo --minify
+      - run: hugo --minify
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./public
-        destination_repo: laphael58/laphael58.github.io
-        keep_files: true
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: main  # 배포 레포 브랜치
+          destination_repo: laphael58/laphael58.github.io  # 배포 레포

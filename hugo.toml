@@ -5,10 +5,5 @@ theme = "PaperMod"
 relativeURLs = false
 canonifyURLs = true
 
-[author]
-  name = KU_SSH"
-  homepage = "https://github.com/laphael58"
-  bio = "웹 해킹과 보안 실습 기록 블로그"
-
-[social]
-github = "https://github.com/laphael58"
+[permalinks]
+posts = "/:slug/"
