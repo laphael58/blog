@@ -4,11 +4,15 @@ title = "Hack-and-Grow"
 theme = "PaperMod"
 relativeURLs = false
 canonifyURLs = true
+summaryLength = 30
+
+[params]
+customCSS = ["css/custom.css"]
 
 [params.profileMode]
 enabled = true
 title = "신승환"
-subtitle = "고려대학교 인공지능사이버보안학과 25학번"
+subtitle = "고려대학교 인공지능사이버보안학과 25학번<br>AICS 25 | KOREA UNIV"
 imageUrl = "https://www.korea.ac.kr/sites/ko/images/contents/emblem_1.png"
 imageWidth = 200
 imageHeight = 200
@@ -22,8 +26,25 @@ name = "Archive"
 url = "/archive/"
 
 [[params.profileMode.buttons]]
-name = "Github"
-url = "https://github.com/"
+name = "About"
+url = "/about/"
+
+[[params.socialIcons]]
+    name = "Github"
+    url = "https://github.com/laphael58"
+
+[[params.socialIcons]]
+    name = "Instagram"
+    url  = "https://www.instagram.com/tlstmdghks_/"
+
+[params.fuseOpts]
+isCaseSensitive = false
+shouldSort = true
+location = 0
+distance = 1000
+threshold = 0.4
+minMatchCharLength = 0
+keys = ["title", "permalink", "summary", "content"]
 
 [permalinks]
 posts = "/:slug/"
@@ -44,3 +65,21 @@ posts = "/:slug/"
   name = "Archive"
   url = "/archive/"
   weight = 3
+
+  [[menu.main]]
+  name = "About"
+  url = "/about/"
+  weight = 4
+
+  [[menu.main]]
+  name = "🔍︎"
+  url = "/search/"
+  weight = 5
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
