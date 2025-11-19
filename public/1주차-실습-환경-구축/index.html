@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>1주차 : 실습 환경 구축 | Hack-and-Grow</title>
+<meta name="keywords" content="1st, dvwa, web">
+<meta name="description" content="
+1주차 학습 목표
+토스(Toss)의 Application Security 영역 및 Backend/Platform Security Engineering 직무 역량 기준을 참고하여,
+웹 취약점 중 가장 핵심인 **XSS(Cross-Site Scripting)**를 DVWA를 통해 공격/우회 실습을 해보며 분석.
+
+학습 배경 &amp; 동기
+토스(Toss)의 여러 포지션을 살펴보면 공통적으로 다음 역량을 매우 강조한다.">
+<meta name="author" content="신승환">
+<link rel="canonical" href="http://localhost:1313/1%EC%A3%BC%EC%B0%A8-%EC%8B%A4%EC%8A%B5-%ED%99%98%EA%B2%BD-%EA%B5%AC%EC%B6%95/">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.d699cb794946d6d43fcf6c514631ddedba614e8cef359b7df16f5678caf97ee1.css" integrity="sha256-1pnLeUlG1tQ/z2xRRjHd7bphTozvNZt98W9WeMr5fuE=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/1%EC%A3%BC%EC%B0%A8-%EC%8B%A4%EC%8A%B5-%ED%99%98%EA%B2%BD-%EA%B5%AC%EC%B6%95/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Hack-and-Grow (Alt + H)">Hack-and-Grow</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archive/" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍︎">
+                    <span>🔍︎</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      1주차 : 실습 환경 구축
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+    </h1>
+    <div class="post-meta"><span title='2025-11-18 17:24:56 +0900 KST'>November 18, 2025</span>&nbsp;·&nbsp;<span>신승환</span>
+
+</div>
+  </header> 
+  <div class="post-content"><hr>
+<h3 id="1주차-학습-목표">1주차 학습 목표<a hidden class="anchor" aria-hidden="true" href="#1주차-학습-목표">#</a></h3>
+<p>토스(Toss)의 Application Security 영역 및 Backend/Platform Security Engineering 직무 역량 기준을 참고하여,
+웹 취약점 중 가장 핵심인 **XSS(Cross-Site Scripting)**를 DVWA를 통해 공격/우회 실습을 해보며 분석.</p>
+<hr>
+<h3 id="학습-배경--동기">학습 배경 &amp; 동기<a hidden class="anchor" aria-hidden="true" href="#학습-배경--동기">#</a></h3>
+<p>토스(Toss)의 여러 포지션을 살펴보면 공통적으로 다음 역량을 매우 강조한다.</p>
+<ul>
+<li>웹 서비스 내부 동작에 대한 깊은 이해</li>
+<li>Security mindset + 공격/방어 로직 분석 능력</li>
+<li>웹 공격 Payload 작성 및 우회 능력</li>
+<li>브라우저 보안 메커니즘 이해</li>
+<li>입력 검증/출력 인코딩의 실제 영향 분석</li>
+</ul>
+<p>XSS는 웹 취약점의 기초이지만 실제 서비스에서 빈번하게 발생한다. 이를 Low -&gt; Medium -&gt; High 난이도로 직접 분석/우회해 보며,
+토스(Toss)가 요구하는 <strong>문제 자체를 깊게 이해하고, 직접 분석해서 해결할 수 있는 능력</strong>을 기르는데 초점을 맞추었다.</p>
+<hr>
+<h2 id="목차">목차<a hidden class="anchor" aria-hidden="true" href="#목차">#</a></h2>
+<ol start="0">
+<li>실습 환경 구축</li>
+<li>XSS (Reflected, Stored, DOM) Low 단계 실습</li>
+<li>Medium -&gt; High 단계 실습</li>
+<li>Impossible 코드 분석</li>
+</ol>
+<hr>
+<h2 id="0-실습-환경-구축">0. 실습 환경 구축<a hidden class="anchor" aria-hidden="true" href="#0-실습-환경-구축">#</a></h2>
+<h3 id="실습-환경">실습 환경<a hidden class="anchor" aria-hidden="true" href="#실습-환경">#</a></h3>
+<p>현재 나는 <strong>MacBook Air 13</strong>(M3, 2024)에서 <strong>VMware Fusion</strong>(Debian 12.x arm64)을 이용하고 있다.</p>
+<h3 id="환경-구축">환경 구축<a hidden class="anchor" aria-hidden="true" href="#환경-구축">#</a></h3>
+<p>먼저 실습을 하기 위한 환경을 만들어야한다. 먼저 리눅스에 접속한 뒤 업데이트 후 필수 패키지를 설치하였다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt update <span style="color:#f92672">&amp;&amp;</span> sudo apt upgrade -y
+</span></span></code></pre></div><h4 id="오류-발생--해결-과정">오류 발생 &amp; 해결 과정<a hidden class="anchor" aria-hidden="true" href="#오류-발생--해결-과정">#</a></h4>
+<p>그런데 터미널에 입력한 후에 아래와 같은 오류가 발생하였다.<br>
+오류를 해결하기 위해 자세히 읽어보니 공간이 필요하다고 한다. &lsquo;공간은 넉넉할텐데 왜 부족하다고 하지&rsquo; 라는 궁금증이 생겼다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Warning: More space needed than available: <span style="color:#ae81ff">1501</span> MB &gt; <span style="color:#ae81ff">242</span> MB, 
+</span></span><span style="display:flex;"><span>installation may fail Error: You don<span style="color:#960050;background-color:#1e0010">&#39;</span>t have enough free space in /var/cache/apt/archives/.
+</span></span></code></pre></div><p>일단 찾아보니 아래의 코드를 터미널에 입력하면 캐시가 정리된다고 하여 입력해보았다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt clean
+</span></span><span style="display:flex;"><span>sudo apt autoclean -y
+</span></span></code></pre></div><p>완료된 것을 확인한 후 다시 업데이트와 업그레이드를 진행하니 똑같은 오류가 발생하였다.<br>
+그래서 계속 찾아보았더니 현재 마운트 되지 않은 스토리지를 볼 수 있는 아래의 코드를 입력해보라고 한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>lsdlk
+</span></span></code></pre></div><p>이를 터미널에 입력한 후 결과를 보니 아래와 같았다.<br>
+VMware에서는 40G로 잡혀있지만 Debian은 18G만 사용하고 있어서 공간 부족이 발생한 것이다!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+</span></span><span style="display:flex;"><span>sr0          11:0    <span style="color:#ae81ff">1</span>  3.5G  <span style="color:#ae81ff">0</span> rom  
+</span></span><span style="display:flex;"><span>nvme0n1     259:0    <span style="color:#ae81ff">0</span>   40G  <span style="color:#ae81ff">0</span> disk 
+</span></span><span style="display:flex;"><span>|-nvme0n1p1 259:1    <span style="color:#ae81ff">0</span>   16M  <span style="color:#ae81ff">0</span> part 
+</span></span><span style="display:flex;"><span>|-nvme0n1p2 259:2    <span style="color:#ae81ff">0</span>  967M  <span style="color:#ae81ff">0</span> part /boot/efi
+</span></span><span style="display:flex;"><span>|-nvme0n1p3 259:3    <span style="color:#ae81ff">0</span>   18G  <span style="color:#ae81ff">0</span> part /
+</span></span><span style="display:flex;"><span>-nvme0n1p4 259:4    <span style="color:#ae81ff">0</span>    1G  <span style="color:#ae81ff">0</span> part <span style="color:#f92672">[</span>SWAP<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>이를 해결하기 위해 Gparted를 이용하여 루트 파티션을 확장하였다.
+방법은 아래와 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt intsall gparted
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gparted
+</span></span></code></pre></div><p>Gparted를 실행 시킨 후 SWAP 파티션(nvme0n1p4)를 선택 후 Swap off -&gt;<br>
+SWAP 파티션을 맨 끝으로 이동 (할당되지 않은 파티션이 루트 파티션 뒤쪽으로 오게) -&gt;<br>
+루트 파티션을 선택한 후 Redize/Move 공간 확장 -&gt;<br>
+이후 SWAP 다시 활성화</p>
+<h4 id="오류-해결">오류 해결<a hidden class="anchor" aria-hidden="true" href="#오류-해결">#</a></h4>
+<p>이제 다시 업그레이드와 얻데이트를 진행하니 성공적으로 완료되었다.<br>
+이후 웹해킹 실습 기본 패키지를 설치하였다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt install -y git curl wget vim build-essential net-tools openssh-server <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    python3 python3-pip python3-venv default-jdk unzip nginx apache2 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    mariadb-server php php-mysqli php-cli php-curl php-xml php-mbstring <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    nodejs npm docker.io docker-compose nmap tcpdump sqlmap
+</span></span></code></pre></div><p>주요 패키지들이 설치가 잘 되었는지 확인하기 위해 아래의 코드를 터미널에 입력하였다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>python3 --version
+</span></span><span style="display:flex;"><span>node -v
+</span></span><span style="display:flex;"><span>php -v
+</span></span><span style="display:flex;"><span>apache2 -v
+</span></span><span style="display:flex;"><span>mysql --version
+</span></span><span style="display:flex;"><span>docker --version
+</span></span></code></pre></div><p><strong>결과</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Python 3.13.9
+</span></span><span style="display:flex;"><span>v20.19.5
+</span></span><span style="display:flex;"><span>PHP 8.4.11 <span style="color:#f92672">(</span>cli<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>built: Aug <span style="color:#ae81ff">15</span> <span style="color:#ae81ff">2025</span> 23:56:47<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>NTS<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Copyright <span style="color:#f92672">(</span>c<span style="color:#f92672">)</span> The PHP Group
+</span></span><span style="display:flex;"><span>Built by Debian
+</span></span><span style="display:flex;"><span>Zend Engine v4.4.11, Copyright <span style="color:#f92672">(</span>c<span style="color:#f92672">)</span> Zend Technologies
+</span></span><span style="display:flex;"><span>    with Zend OPcache v8.4.11, Copyright <span style="color:#f92672">(</span>c<span style="color:#f92672">)</span>, by Zend Technologies
+</span></span><span style="display:flex;"><span>Server version: Apache/2.4.65 <span style="color:#f92672">(</span>Debian<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>Server built:   2025-08-15T08:32:25
+</span></span><span style="display:flex;"><span>mysql from 11.8.3-MariaDB, client 15.2 <span style="color:#66d9ef">for</span> debian-linux-gnu <span style="color:#f92672">(</span>aarch64<span style="color:#f92672">)</span> using  EditLine wrapper
+</span></span><span style="display:flex;"><span>Docker version 27.5.1+dfsg4, build cab968b3
+</span></span></code></pre></div><p>잘 설치가 된 것을 볼 수 있었다.<br>
+이후 <strong>Burp Suite를 설치</strong>해야지만 나는 이미 설치되어 있기에 바로 <strong>DVWA를 설치</strong>하였다.</p>
+<h3 id="dvwa-설치">DVWA 설치<a hidden class="anchor" aria-hidden="true" href="#dvwa-설치">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd /var/www/html
+</span></span><span style="display:flex;"><span>sudo git clone https://github.com/digininja/DVWA.git
+</span></span><span style="display:flex;"><span>sudo mv DVWA dvwa
+</span></span></code></pre></div><p>설치를 완료한 후 <strong>웹서버가 파일을 읽고 쓰기가 가능하게 권한을 설정</strong>해주었다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo chown -R www-data:www-data /var/www/html/dvwa
+</span></span><span style="display:flex;"><span>sudo chmod -R <span style="color:#ae81ff">755</span> /var/www/html/dvwa
+</span></span></code></pre></div><p>이후 <strong>DB를 생성</strong>하였다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo mariadb
+</span></span></code></pre></div><p>MariaDB 콘솔에 <strong>DB를 설정</strong>하기 위해 코드 입력</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> dvwa;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">USER</span> <span style="color:#e6db74">&#39;dvwa&#39;</span><span style="color:#f92672">@</span><span style="color:#e6db74">&#39;localhost&#39;</span> IDENTIFIED <span style="color:#66d9ef">BY</span> <span style="color:#e6db74">&#39;dvwapass&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">ALL</span> <span style="color:#66d9ef">PRIVILEGES</span> <span style="color:#66d9ef">ON</span> dvwa.<span style="color:#f92672">*</span> <span style="color:#66d9ef">TO</span> <span style="color:#e6db74">&#39;dvwa&#39;</span><span style="color:#f92672">@</span><span style="color:#e6db74">&#39;localhost&#39;</span>;
+</span></span><span style="display:flex;"><span>FLUSH <span style="color:#66d9ef">PRIVILEGES</span>;
+</span></span><span style="display:flex;"><span>exit;
+</span></span></code></pre></div><p>위 SQL 명령어에 대해서 궁금하여 찾아보았다<br>
+2번째 줄은 이름이 dvwa인 새 데이터베이스를 생성하는 구문이다.<br>
+3번째 줄은 dvwa라는 사용자 계정을 만드는 것이고,<br>
+4번쨰 줄은 dvwa 데이터베이스에 대한 모든 권한을 dvwa계정에 부여하는 구문이다.<br>
+dvwa.* 은 dvwa 데이터베이스 안의 모든 테이블을 의미한다.<br>
+5번째 줄은 지금까지 변경한 내용을 서버에 즉시 적용하라는 의미의 구문이다.<br></p>
+<p>DB를 생성한 후 <strong>DVWA 설정 파일을 수정</strong>하여야한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd /var/www/html/dvwa/config
+</span></span><span style="display:flex;"><span>sudo cp config.inc.php.dist config.inc.php
+</span></span><span style="display:flex;"><span>sudo nano config.inc.php
+</span></span></code></pre></div><p>아래의 부분만 수정해주었다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$_DVWA<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;db_user&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;dvwa&#39;</span>;
+</span></span><span style="display:flex;"><span>$_DVWA<span style="color:#f92672">[</span><span style="color:#e6db74">&#39;db_password&#39;</span><span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;dvwa123!&#39;</span>;
+</span></span></code></pre></div><p>수정이 완료 되었으면 <strong>apache를 재시작</strong>해주었다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl restart apache2
+</span></span></code></pre></div><p>완료한 후 FireFox를 이용하여 <strong>DVWA에 접속</strong>하였다.</p>
+<pre tabindex="0"><code class="language-URL" data-lang="URL">http://localhost/dvwa
+</code></pre><p>admin / password 로 로그인을 한 후<br>
+Setup -&gt; Create / Reset Database 를 클릭하여 데이터베이스를 생성/초기화 하였다.<br>
+이후 Security Level을 &lsquo;Low&rsquo;로 설정한 뒤 실습을 진행하였다.<br>
+그런데 창을 껐다가 다시 열었더니 Security Level이 &lsquo;Impossible&rsquo;로 초기화 되어있어 이를 해결하기 위해 다음과 같이 하였다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo nano /var/www/html/dvwa/config/config.inc.php
+</span></span></code></pre></div><p>파일을 열어 디폴트 값을 &lsquo;Impossible&rsquo;에서 &lsquo;Low&rsquo;로 변경하였다.</p>
+<p>이후 본격적으로 DVWA를 이용한 XSS 실습을 시작하였다.</p>
+<hr>
+<h2 id="1-xssreflectedstoreddom-실습">1. XSS(Reflected/Stored/DOM) 실습<a hidden class="anchor" aria-hidden="true" href="#1-xssreflectedstoreddom-실습">#</a></h2>
+<h3 id="reflected-xss-level-low">Reflected XSS (Level: Low)<a hidden class="anchor" aria-hidden="true" href="#reflected-xss-level-low">#</a></h3>
+<p>입력창에 hello를 입력해보니 <em><strong>Hello hello</strong></em>가 출력되었다.</p>
+<p>Burp Suite를 이용하여 Intercept 해보니</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>GET <span style="color:#f92672">/</span>vulnerabilities<span style="color:#f92672">/</span>xss_r<span style="color:#f92672">/?</span>name<span style="color:#f92672">=</span>hello HTTP<span style="color:#f92672">/</span>1.<span style="color:#a6e22e">1</span>
+</span></span></code></pre></div><p><strong>name 파라미터에 삽입된 글씨가 그대로 페이지에 실행되는 구조인걸 확인할 수 있었다.</strong><br>
+따라서 스크립트가 파라미터에 삽입되면 아무 필터링 없이 스크립트가 실행이 되게 된다.</p>
+<p>입력창에 가장 기본적인 스크립트를 입력해보았다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">alert</span>(<span style="color:#ae81ff">1</span>)<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/script&gt;</span>
+</span></span></code></pre></div><p>브라우저에 팝업이 뜨며 성공하였다.</p>
+<p>이 또한 Burp Suite로 Intercept 해보니</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>GET <span style="color:#f92672">/</span>vulnerabilities<span style="color:#f92672">/</span>xss_r<span style="color:#f92672">/?</span>name<span style="color:#f92672">=&lt;</span>script<span style="color:#f92672">&gt;</span>alert(1)<span style="color:#f92672">&lt;/</span>script<span style="color:#f92672">&gt;</span> HTTP<span style="color:#f92672">/</span>1.<span style="color:#a6e22e">1</span>
+</span></span></code></pre></div><p>위와 같이 파라미에 삽입된 스크립트가 그대로 페이지에 반사(Reflect)되어 실행되는 구조임을 한 번 더 확인 할 수 있다.</p>
+<p>이제 Low단계를 해결했으니 기본적인 스크립트 외의 다른 스크립트도 궁금하여 찾아보았다.
+찾아본 스크립트들은 아래와 같다.</p>
+<h4 id="oneeroor-이벤트-활용-스크립트가-막힐때">oneeroor 이벤트 활용 (스크립트가 막힐때)<a hidden class="anchor" aria-hidden="true" href="#oneeroor-이벤트-활용-스크립트가-막힐때">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">img</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#a6e22e">x</span> <span style="color:#a6e22e">onerror</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><h4 id="펄터링-테스트용">펄터링 테스트용<a hidden class="anchor" aria-hidden="true" href="#펄터링-테스트용">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">ScRiPt</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/ScRiPt&gt;</span>
+</span></span></code></pre></div><h4 id="html-종료-태그로-html-구조-파괴">HTML 종료 태그로 HTML 구조 파괴<a hidden class="anchor" aria-hidden="true" href="#html-종료-태그로-html-구조-파괴">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&#34;&gt;&lt;<span style="color:#f92672">h1</span>&gt;Injected&lt;/<span style="color:#f92672">h1</span>&gt;
+</span></span></code></pre></div><h4 id="html-종료-태그--svg를-이용한-스크립트">HTML 종료 태그 + svg를 이용한 스크립트<a hidden class="anchor" aria-hidden="true" href="#html-종료-태그--svg를-이용한-스크립트">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&#34;&gt;&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#e6db74">alert(&#39;HACKED&#39;)</span>&gt;
+</span></span></code></pre></div><p>미리 이야기하자면 바로 위의 svg를 이용한 스크립트를 이용하여 모든 레벨의 XSS 실습에 이용하여 공격에 성공하였다.</p>
+<hr>
+<h3 id="stored-xss-low">Stored XSS (Low)<a hidden class="anchor" aria-hidden="true" href="#stored-xss-low">#</a></h3>
+<p>Stored는 이름과 내용을 입력하는 입력창이 있고 Sign Guestbook 버튼을 눌러 DB에 저장하는 방식인 거 같았다.</p>
+<p>먼저 이름에 &rsquo;name&rsquo;, 내용에는 &ldquo;hello, world!&ldquo;를 적고 Sign Guestbook 버튼을 클릭해 DB에 저장해보았다.</p>
+<p>결과는 다음과 같았다.<br>
+<img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_1.png"></p>
+<p><strong>입력을 하면 DB에 저장한 뒤 자동으로 출력하는 구조였다.</strong></p>
+<p>이제 구조를 더 자세히 살펴보기 위해 Name과 Messagge 입력창에 아무거나 막 입력해보니 글자수 제한이 있다는 것을 확인할 수 있었다. <br>
+정확히 확인하기 위해 <strong>개발자 도구(F12)를 이용</strong>하여 살펴보니 아래와 같은 코드를 확인 할 수 있었다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;txtName&#34;</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">size</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;30&#34;</span> <span style="color:#a6e22e">maxlength</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;10&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">textarea</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;mtxMessage&#34;</span> <span style="color:#a6e22e">cols</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span> <span style="color:#a6e22e">rows</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;3&#34;</span> <span style="color:#a6e22e">maxlength</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span>&gt;&lt;/<span style="color:#f92672">textarea</span>&gt;
+</span></span></code></pre></div><ul>
+<li>Name : 10자 까지 제한</li>
+<li>Message : 50자 까지 제한</li>
+</ul>
+<p>이를 <strong>개발자 도구(F12)를 이용하여 maxlength를 모두 100으로 수정</strong>을 한 뒤에 입력을 해보니 제한이 100자 까지 늘어난 것을 볼 수 있었다. <br></p>
+<p>이제 스크립트들을 삽입하여 보자 만약 이름과 메시지를 DB에 저장할때 아무 검증이 이루어지지 않으면 취약점이 발생할 것이다. <br>
+이를 확인하기 위해 Name에는 &lsquo;hacker&rsquo;, Message에는 아래와 같은 스크립트를 입력 해보았다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#f92672">&gt;&lt;</span><span style="color:#a6e22e">svg</span><span style="color:#f92672">/</span><span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p>결과는 다음과 같이 팝업이 뜨는 걸 확인할 수 있었다. 이를 통해 <strong>아무 검증이 없다</strong>는 것을 알 수 있었다.</p>
+<p><img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_2.png"></p>
+<hr>
+<p>이번 실습에서도 다른 Payload가 궁금하여 더 찾아보았다.</p>
+<p><em><strong>Stored XSS는 한 번 DB에 들어가 순간 그 게시판을 이용하는 모든 사람에게 피해가 가는 아주 위험한 취약점이다.</strong></em></p>
+<p>아래와 같은 스크립트를 이용하여 게시판의 페이지 전체를 바꿔버릴 수도 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span>document.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">innerHTML</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Hacked by KU&#39;</span>;<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/script&gt;</span>
+</span></span></code></pre></div><p><img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_3.png"></p>
+<p>그러나 위 코드를 삽입하면 다음 스크립트를 실습할 수 없기에 DB에 접속하여 지워줘야한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mariadb
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>USE dvwa;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> guestbook;
+</span></span></code></pre></div><p>스크립트가 들어가 있는 걸 확인 한 뒤 guestbook 테이블에 저장된 내용을 삭제를 한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">DELETE</span>  <span style="color:#66d9ef">FROM</span> guestbook
+</span></span></code></pre></div><hr>
+<p><strong>HTML 코드를 분석하여 HTML 구조를 파괴하며 스크립트를 삽입</strong>할 수도 있었다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;/<span style="color:#f92672">textarea</span>&gt;&lt;<span style="color:#f92672">script</span>&gt;<span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span></code></pre></div><p><img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_4.png"></p>
+<hr>
+<h4 id="stored-xss-분석">Stored XSS 분석<a hidden class="anchor" aria-hidden="true" href="#stored-xss-분석">#</a></h4>
+<p>정리하면 Stroed XSS는 공격자가 악성 스크립트를 입력하여 DB에 저장되게 되면 서버는 그걸 읽어서 HTML에 넣어버린다.<br>
+따라서 그 악성 스크립트가 들어간 페이지에 들어가는 사람은 전부 감염되는 구조인 것이다.</p>
+<p>지속적으로 공격이 가능하고, 관리자까지 공격하여 csrf token, 쿠키 등의 정보를 탈취 할 수도 있다.</p>
+<p>Stroed XSS가 실제 해킹에서도 자주 쓰이는 이유가 위와 같다.</p>
+<hr>
+<h3 id="dom-xss-low">DOM XSS (Low)<a hidden class="anchor" aria-hidden="true" href="#dom-xss-low">#</a></h3>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">Hack-and-Grow</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
