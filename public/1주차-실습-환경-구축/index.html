@@ -156,7 +156,7 @@
   <div class="post-content"><hr>
 <h3 id="1주차-학습-목표">1주차 학습 목표<a hidden class="anchor" aria-hidden="true" href="#1주차-학습-목표">#</a></h3>
 <p>토스(Toss)의 Application Security 영역 및 Backend/Platform Security Engineering 직무 역량 기준을 참고하여,
-웹 취약점 중 가장 핵심인 **XSS(Cross-Site Scripting)**를 DVWA를 통해 공격/우회 실습을 해보며 분석.</p>
+웹 취약점 중 가장 핵심인 **XSS(Cross-Site Scripting)**를 DVWA를 통해 공격/우회 실습을 해보며 분석.<br><br></p>
 <hr>
 <h3 id="학습-배경--동기">학습 배경 &amp; 동기<a hidden class="anchor" aria-hidden="true" href="#학습-배경--동기">#</a></h3>
 <p>토스(Toss)의 여러 포지션을 살펴보면 공통적으로 다음 역량을 매우 강조한다.</p>
@@ -168,23 +168,39 @@
 <li>입력 검증/출력 인코딩의 실제 영향 분석</li>
 </ul>
 <p>XSS는 웹 취약점의 기초이지만 실제 서비스에서 빈번하게 발생한다. 이를 Low -&gt; Medium -&gt; High 난이도로 직접 분석/우회해 보며,
-토스(Toss)가 요구하는 <strong>문제 자체를 깊게 이해하고, 직접 분석해서 해결할 수 있는 능력</strong>을 기르는데 초점을 맞추었다.</p>
+토스(Toss)가 요구하는 <strong>문제 자체를 깊게 이해하고, 직접 분석해서 해결할 수 있는 능력</strong>을 기르는데 초점을 맞추었다.<br><br></p>
 <hr>
 <h2 id="목차">목차<a hidden class="anchor" aria-hidden="true" href="#목차">#</a></h2>
 <ol start="0">
-<li>실습 환경 구축</li>
-<li>XSS (Reflected, Stored, DOM) Low 단계 실습</li>
-<li>Medium -&gt; High 단계 실습</li>
-<li>Impossible 코드 분석</li>
+<li><a href="#0-%EC%8B%A4%EC%8A%B5-%ED%99%98%EA%B2%BD-%EA%B5%AC%EC%B6%95">실습 환경 구축</a>
+<ul>
+<li><a href="#%EC%8B%A4%EC%8A%B5-%ED%99%98%EA%B2%BD">실습 환경</a></li>
+<li><a href="#%ED%99%98%EA%B2%BD-%EA%B5%AC%EC%B6%95">환경 구축</a></li>
+<li><a href="#dvwa-%EC%84%A4%EC%B9%98">DVWA 설치</a></li>
+</ul>
+</li>
+<li><a href="#1-xssreflectedstoreddom-%EC%8B%A4%EC%8A%B5">XSS (Reflected, Stored, DOM) Low 단계 실습</a>
+<ul>
+<li><a href="#reflected-xss-low">Reflected XSS</a></li>
+<li><a href="#stored-xss-low">Stored XSS</a></li>
+<li><a href="#dom-xss-low">DOM XSS</a></li>
+</ul>
+</li>
+<li><a href="#2-medium---high-%EB%8B%A8%EA%B3%84-%EC%8B%A4%EC%8A%B5">Medium -&gt; High 단계 실습</a></li>
+<li>Impossible 단계 코드 분석</li>
+<li>대응 방안</li>
+<li>마무리<br><br></li>
 </ol>
 <hr>
 <h2 id="0-실습-환경-구축">0. 실습 환경 구축<a hidden class="anchor" aria-hidden="true" href="#0-실습-환경-구축">#</a></h2>
 <h3 id="실습-환경">실습 환경<a hidden class="anchor" aria-hidden="true" href="#실습-환경">#</a></h3>
 <p>현재 나는 <strong>MacBook Air 13</strong>(M3, 2024)에서 <strong>VMware Fusion</strong>(Debian 12.x arm64)을 이용하고 있다.</p>
+<br>
 <h3 id="환경-구축">환경 구축<a hidden class="anchor" aria-hidden="true" href="#환경-구축">#</a></h3>
 <p>먼저 실습을 하기 위한 환경을 만들어야한다. 먼저 리눅스에 접속한 뒤 업데이트 후 필수 패키지를 설치하였다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt update <span style="color:#f92672">&amp;&amp;</span> sudo apt upgrade -y
-</span></span></code></pre></div><h4 id="오류-발생--해결-과정">오류 발생 &amp; 해결 과정<a hidden class="anchor" aria-hidden="true" href="#오류-발생--해결-과정">#</a></h4>
+</span></span></code></pre></div><br>
+<h4 id="오류-발생--해결-과정">오류 발생 &amp; 해결 과정<a hidden class="anchor" aria-hidden="true" href="#오류-발생--해결-과정">#</a></h4>
 <p>그런데 터미널에 입력한 후에 아래와 같은 오류가 발생하였다.<br>
 오류를 해결하기 위해 자세히 읽어보니 공간이 필요하다고 한다. &lsquo;공간은 넉넉할텐데 왜 부족하다고 하지&rsquo; 라는 궁금증이 생겼다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Warning: More space needed than available: <span style="color:#ae81ff">1501</span> MB &gt; <span style="color:#ae81ff">242</span> MB, 
@@ -212,6 +228,7 @@ VMware에서는 40G로 잡혀있지만 Debian은 18G만 사용하고 있어서 �
 SWAP 파티션을 맨 끝으로 이동 (할당되지 않은 파티션이 루트 파티션 뒤쪽으로 오게) -&gt;<br>
 루트 파티션을 선택한 후 Redize/Move 공간 확장 -&gt;<br>
 이후 SWAP 다시 활성화</p>
+<br>
 <h4 id="오류-해결">오류 해결<a hidden class="anchor" aria-hidden="true" href="#오류-해결">#</a></h4>
 <p>이제 다시 업그레이드와 얻데이트를 진행하니 성공적으로 완료되었다.<br>
 이후 웹해킹 실습 기본 패키지를 설치하였다.</p>
@@ -240,6 +257,7 @@ SWAP 파티션을 맨 끝으로 이동 (할당되지 않은 파티션이 루트 
 </span></span><span style="display:flex;"><span>Docker version 27.5.1+dfsg4, build cab968b3
 </span></span></code></pre></div><p>잘 설치가 된 것을 볼 수 있었다.<br>
 이후 <strong>Burp Suite를 설치</strong>해야지만 나는 이미 설치되어 있기에 바로 <strong>DVWA를 설치</strong>하였다.</p>
+<br>
 <h3 id="dvwa-설치">DVWA 설치<a hidden class="anchor" aria-hidden="true" href="#dvwa-설치">#</a></h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd /var/www/html
 </span></span><span style="display:flex;"><span>sudo git clone https://github.com/digininja/DVWA.git
@@ -278,34 +296,41 @@ Setup -&gt; Create / Reset Database 를 클릭하여 데이터베이스를 생�
 그런데 창을 껐다가 다시 열었더니 Security Level이 &lsquo;Impossible&rsquo;로 초기화 되어있어 이를 해결하기 위해 다음과 같이 하였다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo nano /var/www/html/dvwa/config/config.inc.php
 </span></span></code></pre></div><p>파일을 열어 디폴트 값을 &lsquo;Impossible&rsquo;에서 &lsquo;Low&rsquo;로 변경하였다.</p>
-<p>이후 본격적으로 DVWA를 이용한 XSS 실습을 시작하였다.</p>
+<p>이후 본격적으로 DVWA를 이용한 XSS 실습을 시작하였다.<br><br></p>
 <hr>
 <h2 id="1-xssreflectedstoreddom-실습">1. XSS(Reflected/Stored/DOM) 실습<a hidden class="anchor" aria-hidden="true" href="#1-xssreflectedstoreddom-실습">#</a></h2>
-<h3 id="reflected-xss-level-low">Reflected XSS (Level: Low)<a hidden class="anchor" aria-hidden="true" href="#reflected-xss-level-low">#</a></h3>
+<h3 id="reflected-xss-low">Reflected XSS (Low)<a hidden class="anchor" aria-hidden="true" href="#reflected-xss-low">#</a></h3>
+<h4 id="구조-확인">구조 확인<a hidden class="anchor" aria-hidden="true" href="#구조-확인">#</a></h4>
 <p>입력창에 hello를 입력해보니 <em><strong>Hello hello</strong></em>가 출력되었다.</p>
 <p>Burp Suite를 이용하여 Intercept 해보니</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>GET <span style="color:#f92672">/</span>vulnerabilities<span style="color:#f92672">/</span>xss_r<span style="color:#f92672">/?</span>name<span style="color:#f92672">=</span>hello HTTP<span style="color:#f92672">/</span>1.<span style="color:#a6e22e">1</span>
 </span></span></code></pre></div><p><strong>name 파라미터에 삽입된 글씨가 그대로 페이지에 실행되는 구조인걸 확인할 수 있었다.</strong><br>
 따라서 스크립트가 파라미터에 삽입되면 아무 필터링 없이 스크립트가 실행이 되게 된다.</p>
+<br>
+<h4 id="공격-시도">공격 시도<a hidden class="anchor" aria-hidden="true" href="#공격-시도">#</a></h4>
 <p>입력창에 가장 기본적인 스크립트를 입력해보았다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">alert</span>(<span style="color:#ae81ff">1</span>)<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/script&gt;</span>
 </span></span></code></pre></div><p>브라우저에 팝업이 뜨며 성공하였다.</p>
+<br>
+<h4 id="burp-suite로-분석">Burp SUite로 분석<a hidden class="anchor" aria-hidden="true" href="#burp-suite로-분석">#</a></h4>
 <p>이 또한 Burp Suite로 Intercept 해보니</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>GET <span style="color:#f92672">/</span>vulnerabilities<span style="color:#f92672">/</span>xss_r<span style="color:#f92672">/?</span>name<span style="color:#f92672">=&lt;</span>script<span style="color:#f92672">&gt;</span>alert(1)<span style="color:#f92672">&lt;/</span>script<span style="color:#f92672">&gt;</span> HTTP<span style="color:#f92672">/</span>1.<span style="color:#a6e22e">1</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> /vulnerabilities/xss_r/?name=&lt;script&gt;alert(1)&lt;/script&gt; <span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span>
 </span></span></code></pre></div><p>위와 같이 파라미에 삽입된 스크립트가 그대로 페이지에 반사(Reflect)되어 실행되는 구조임을 한 번 더 확인 할 수 있다.</p>
-<p>이제 Low단계를 해결했으니 기본적인 스크립트 외의 다른 스크립트도 궁금하여 찾아보았다.
-찾아본 스크립트들은 아래와 같다.</p>
-<h4 id="oneeroor-이벤트-활용-스크립트가-막힐때">oneeroor 이벤트 활용 (스크립트가 막힐때)<a hidden class="anchor" aria-hidden="true" href="#oneeroor-이벤트-활용-스크립트가-막힐때">#</a></h4>
+<br>
+<p>이제 Low단계를 해결했으니 기본적인 Payload 외의 다른 Patload도 궁금하여 찾아보았다.
+찾아본 Payload들은 아래와 같다.</p>
+<h4 id="oneeroor-이벤트-활용-script가-막힐때">oneeroor 이벤트 활용 (script가 막힐때)<a hidden class="anchor" aria-hidden="true" href="#oneeroor-이벤트-활용-script가-막힐때">#</a></h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">img</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#a6e22e">x</span> <span style="color:#a6e22e">onerror</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
 </span></span></code></pre></div><h4 id="펄터링-테스트용">펄터링 테스트용<a hidden class="anchor" aria-hidden="true" href="#펄터링-테스트용">#</a></h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">ScRiPt</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/ScRiPt&gt;</span>
 </span></span></code></pre></div><h4 id="html-종료-태그로-html-구조-파괴">HTML 종료 태그로 HTML 구조 파괴<a hidden class="anchor" aria-hidden="true" href="#html-종료-태그로-html-구조-파괴">#</a></h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&#34;&gt;&lt;<span style="color:#f92672">h1</span>&gt;Injected&lt;/<span style="color:#f92672">h1</span>&gt;
-</span></span></code></pre></div><h4 id="html-종료-태그--svg를-이용한-스크립트">HTML 종료 태그 + svg를 이용한 스크립트<a hidden class="anchor" aria-hidden="true" href="#html-종료-태그--svg를-이용한-스크립트">#</a></h4>
+</span></span></code></pre></div><h4 id="html-종료-태그--svg를-이용한-payload">HTML 종료 태그 + svg를 이용한 Payload<a hidden class="anchor" aria-hidden="true" href="#html-종료-태그--svg를-이용한-payload">#</a></h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&#34;&gt;&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#e6db74">alert(&#39;HACKED&#39;)</span>&gt;
-</span></span></code></pre></div><p>미리 이야기하자면 바로 위의 svg를 이용한 스크립트를 이용하여 모든 레벨의 XSS 실습에 이용하여 공격에 성공하였다.</p>
+</span></span></code></pre></div><p>미리 이야기하자면 바로 위의 svg를 이용한 Payload를 이용하여 모든 레벨의 XSS 실습에 이용하여 공격에 성공하였다.<br><br></p>
 <hr>
 <h3 id="stored-xss-low">Stored XSS (Low)<a hidden class="anchor" aria-hidden="true" href="#stored-xss-low">#</a></h3>
+<h4 id="구조-확인-1">구조 확인<a hidden class="anchor" aria-hidden="true" href="#구조-확인-1">#</a></h4>
 <p>Stored는 이름과 내용을 입력하는 입력창이 있고 Sign Guestbook 버튼을 눌러 DB에 저장하는 방식인 거 같았다.</p>
 <p>먼저 이름에 &rsquo;name&rsquo;, 내용에는 &ldquo;hello, world!&ldquo;를 적고 Sign Guestbook 버튼을 클릭해 DB에 저장해보았다.</p>
 <p>결과는 다음과 같았다.<br>
@@ -321,35 +346,248 @@ Setup -&gt; Create / Reset Database 를 클릭하여 데이터베이스를 생�
 <li>Message : 50자 까지 제한</li>
 </ul>
 <p>이를 <strong>개발자 도구(F12)를 이용하여 maxlength를 모두 100으로 수정</strong>을 한 뒤에 입력을 해보니 제한이 100자 까지 늘어난 것을 볼 수 있었다. <br></p>
-<p>이제 스크립트들을 삽입하여 보자 만약 이름과 메시지를 DB에 저장할때 아무 검증이 이루어지지 않으면 취약점이 발생할 것이다. <br>
-이를 확인하기 위해 Name에는 &lsquo;hacker&rsquo;, Message에는 아래와 같은 스크립트를 입력 해보았다.</p>
+<br>
+<h4 id="공격-시도-1">공격 시도<a hidden class="anchor" aria-hidden="true" href="#공격-시도-1">#</a></h4>
+<p>이제 Payload들을 삽입하여 보자 만약 이름과 메시지를 DB에 저장할때 아무 검증이 이루어지지 않으면 취약점이 발생할 것이다. <br>
+이를 확인하기 위해 Name에는 &lsquo;hacker&rsquo;, Message에는 아래와 같은 Payload를 입력 해보았다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#f92672">&gt;&lt;</span><span style="color:#a6e22e">svg</span><span style="color:#f92672">/</span><span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
 </span></span></code></pre></div><p>결과는 다음과 같이 팝업이 뜨는 걸 확인할 수 있었다. 이를 통해 <strong>아무 검증이 없다</strong>는 것을 알 수 있었다.</p>
 <p><img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_2.png"></p>
-<hr>
+<br>
 <p>이번 실습에서도 다른 Payload가 궁금하여 더 찾아보았다.</p>
 <p><em><strong>Stored XSS는 한 번 DB에 들어가 순간 그 게시판을 이용하는 모든 사람에게 피해가 가는 아주 위험한 취약점이다.</strong></em></p>
 <p>아래와 같은 스크립트를 이용하여 게시판의 페이지 전체를 바꿔버릴 수도 있다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span>document.<span style="color:#a6e22e">body</span>.<span style="color:#a6e22e">innerHTML</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Hacked by KU&#39;</span>;<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/script&gt;</span>
 </span></span></code></pre></div><p><img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_3.png"></p>
-<p>그러나 위 코드를 삽입하면 다음 스크립트를 실습할 수 없기에 DB에 접속하여 지워줘야한다.</p>
+<p>그러나 위 코드를 삽입하면 다음 Payload를 실습할 수 없기에 DB에 접속하여 지워줘야한다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mariadb
 </span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>USE dvwa;
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> guestbook;
 </span></span></code></pre></div><p>스크립트가 들어가 있는 걸 확인 한 뒤 guestbook 테이블에 저장된 내용을 삭제를 한다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">DELETE</span>  <span style="color:#66d9ef">FROM</span> guestbook
-</span></span></code></pre></div><hr>
+</span></span></code></pre></div><br>
 <p><strong>HTML 코드를 분석하여 HTML 구조를 파괴하며 스크립트를 삽입</strong>할 수도 있었다.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;/<span style="color:#f92672">textarea</span>&gt;&lt;<span style="color:#f92672">script</span>&gt;<span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)&lt;/<span style="color:#f92672">script</span>&gt;
 </span></span></code></pre></div><p><img alt="stored_result_1" loading="lazy" src="http://localhost:1313/img/1week/storedXSS_result_4.png"></p>
-<hr>
+<br>
 <h4 id="stored-xss-분석">Stored XSS 분석<a hidden class="anchor" aria-hidden="true" href="#stored-xss-분석">#</a></h4>
-<p>정리하면 Stroed XSS는 공격자가 악성 스크립트를 입력하여 DB에 저장되게 되면 서버는 그걸 읽어서 HTML에 넣어버린다.<br>
-따라서 그 악성 스크립트가 들어간 페이지에 들어가는 사람은 전부 감염되는 구조인 것이다.</p>
-<p>지속적으로 공격이 가능하고, 관리자까지 공격하여 csrf token, 쿠키 등의 정보를 탈취 할 수도 있다.</p>
+<p>정리하면 Stroed XSS는 공격자가 악성 Payload를 입력하여 DB에 저장되게 되면 서버는 그걸 읽어서 HTML에 넣어버린다.<br>
+따라서 그 악성 Payload가 들어간 페이지에 들어가는 사람은 전부 감염되는 구조인 것이다.</p>
+<p>지속적으로 공격이 가능하고, 관리자까지 공격하여 CSRF Token, 쿠키 등의 정보를 탈취 할 수도 있다.</p>
 <p>Stroed XSS가 실제 해킹에서도 자주 쓰이는 이유가 위와 같다.</p>
+<br>
+<h4 id="payload-분석-javascript">Payload 분석 (JavaScript)<a hidden class="anchor" aria-hidden="true" href="#payload-분석-javascript">#</a></h4>
+<p>XSS(DOM)으로 넘어가기 전에 지금까지 사용하였던 Payload에 대해 궁금하여 Payload가 어떻게 작동하고 JavaScript에 대해 간단히 알아보았다.</p>
+<ol>
+<li><code>&lt;tag&gt;내용&lt;/tag&gt;</code> → HTML 태그</li>
+<li><code>&lt;script&gt; ... &lt;/script&gt;</code> → 자바스크립트 실행 영역</li>
+<li><code>&lt;img ... onerror=&quot;JS코드&quot;&gt;</code> → HTML 태그 속성에서 실행되는 자바스크립트</li>
+<li><code>&lt;a href=&quot;javascript:JS코드&quot;&gt;</code> → 링크 클릭 시 실행되는 자바스크립트</li>
+</ol>
+<p><strong>브라우저는 &ldquo;script가 들어있거나 event 핸들러가 들어있으면&rdquo; 무조건 JS라고 생각하고 실행한다.</strong></p>
+<h4 id="script-태그-직접-실행">script 태그 직접 실행<a hidden class="anchor" aria-hidden="true" href="#script-태그-직접-실행">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/script&gt;</span>
+</span></span></code></pre></div><p>브라우저는 위의 코드를 JS 태그로 인식하여 그대로 실행한다.</p>
+<h4 id="이벤트-실행onerror">이벤트 실행(onerror)<a hidden class="anchor" aria-hidden="true" href="#이벤트-실행onerror">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">img</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">x</span> <span style="color:#a6e22e">onerror</span><span style="color:#f92672">=</span><span style="color:#e6db74">alert(&#39;HACKED&#39;)</span>&gt;
+</span></span></code></pre></div><p>여기서 자바스크립트 부분은 아래와 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)
+</span></span></code></pre></div><p>근데 <code>&lt;img&gt;</code> 태그가 이미 HTML이라고 인식되기 떄문에
+속성 속에서 자바스크립트를 넣는 것만으로 실행되는 것이다.</p>
+<h4 id="javascript-프로토콜">javascript: 프로토콜<a hidden class="anchor" aria-hidden="true" href="#javascript-프로토콜">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;javascript:alert(&#39;HACKED&#39;)&#34;</span>&gt;click&lt;/<span style="color:#f92672">a</span>&gt;
+</span></span></code></pre></div><p><code>javascript:</code> 는 브라우저가 자바스크립트 실행하라는 특수 규칙이다.</p>
+<br>
+<p>XSS Payload는:</p>
+<ul>
+<li>브라우저가 스크립트로 인식하는 구조</li>
+<li>그 안에 자바스크립트 코드</li>
+<li>실행 시 팝업, 쿠키 탈취 등 공격 수행</li>
+</ul>
+<p>이렇게 구성됨을 알 수 있었다.<br><br></p>
 <hr>
 <h3 id="dom-xss-low">DOM XSS (Low)<a hidden class="anchor" aria-hidden="true" href="#dom-xss-low">#</a></h3>
+<p>DOM XSS는 Reflected/Stored와 아예 동작 방식 자체가 다르다.
+서버에서 스크립트를 반사하거나(DB 저장 후 출력) 하는 게 아니라,
+<strong>브라우저 내부의 DOM(Document Object Model)을 조작해서 발생하는 취약점</strong>이다.</p>
+<p><strong>서버는 공격 Payload를 전혀 모르는 상태</strong>에서도 클라이언트 단에서 스크립트가 실행될 수 있다.</p>
+<p>이게 DOM XSS가 더 위험한 이유다.</p>
+<br>
+<h4 id="dom-구조-확인">DOM 구조 확인<a hidden class="anchor" aria-hidden="true" href="#dom-구조-확인">#</a></h4>
+<p>Burp Suite Intercept 결과를 보면 DOM XSS 페이지는 다음과 같은 요청을 보낸다:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> /vulnerabilities/xss_d/?default=English <span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span>
+</span></span></code></pre></div><p>그리고 페이지 아래쪽에는 다음과 같은 JS 코드가 존재한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">defaultLang</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;default&#34;</span>).<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;lang&#34;</span>).<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">defaultLang</span>;
+</span></span></code></pre></div><p>여기서 핵심은:</p>
+<ul>
+<li><strong>input 값(default 파라미터)</strong> → <strong>HTML 내부의 element.innerHTML에 직접 삽입된다.</strong></li>
+<li>서버는 default 값을 그대로 넘겨주기만 하고
+<strong>실제 DOM 요소 변조는 브라우저가 직접 수행한다.</strong></li>
+</ul>
+<p><strong>DOM XSS는 서버가 아닌 클라이언트에서 스크립트가 실행되기 때문에 POST/GET 과도 크게 상관이 없다.</strong></p>
+<br>
+<h4 id="공격-시도-2">공격 시도<a hidden class="anchor" aria-hidden="true" href="#공격-시도-2">#</a></h4>
+<p>Reflected XSS처럼 가장 기본적인 Payload부터 넣어보았다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#f92672">&gt;&lt;</span><span style="color:#a6e22e">svg</span> <span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p>결과는 성공이었다.</p>
+<p>브라우저는 URL 파라미터인 <code>default=</code> 값을 가져와 그대로 DOM 요소에 삽입했고,
+innerHTML이 그대로 실행되면서 <strong>alert 팝업이 발생</strong>했다.</p>
+<br>
+<h4 id="burp-suite로-흐름-분석">Burp Suite로 흐름 분석<a hidden class="anchor" aria-hidden="true" href="#burp-suite로-흐름-분석">#</a></h4>
+<p>Intercept된 요청은 단순히 다음과 같았다:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-http" data-lang="http"><span style="display:flex;"><span><span style="color:#a6e22e">GET</span> /vulnerabilities/xss_d/?default=&#34;&gt;&lt;svg/onload=alert(&#39;DOM&#39;)&gt; <span style="color:#66d9ef">HTTP</span><span style="color:#f92672">/</span><span style="color:#ae81ff">1.1</span>
+</span></span></code></pre></div><p>서버 응답에는 위험한 코드가 포함되지 않았다.
+하지만 브라우저에 로딩되는 최종 HTML은 아래와 같이 변형된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;lang&#34;</span>&gt;&#34;&gt;&lt;<span style="color:#f92672">svg</span> <span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#e6db74">alert(&#39;HACEKD&#39;)</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+</span></span></code></pre></div><p>➡ 여기서 <strong>innerHTML에 직접 삽입되는 구조</strong> 때문에 브라우저가 JS를 실행한다.</p>
+<p>➡ DOM XSS의 근본 원인은 <strong>innerHTML 사용 + 입력 검증 미비</strong>다.</p>
+<br>
+<h4 id="dom-xss와-reflectedstored-xss의-결정적-차이">DOM XSS와 Reflected/Stored XSS의 결정적 차이<a hidden class="anchor" aria-hidden="true" href="#dom-xss와-reflectedstored-xss의-결정적-차이">#</a></h4>
+<table>
+  <thead>
+      <tr>
+          <th>유형</th>
+          <th>스크립트가 실행되는 곳</th>
+          <th>서버가 Payload를 보나?</th>
+          <th>지속성</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Reflected</td>
+          <td>서버가 HTML로 반사</td>
+          <td><strong>본다</strong></td>
+          <td>1회성</td>
+      </tr>
+      <tr>
+          <td>Stored</td>
+          <td>DB → HTML로 출력</td>
+          <td><strong>본다 (DB로 저장됨)</strong></td>
+          <td>지속적</td>
+      </tr>
+      <tr>
+          <td>DOM</td>
+          <td><strong>브라우저의 JS 코드가 삽입하여 실행</strong></td>
+          <td><strong>안 본다</strong></td>
+          <td>페이지 구조에 따라 다름</td>
+      </tr>
+  </tbody>
+</table>
+<p>➡ DOM XSS는 <strong>서버 단 로그나 필터에서 탐지되지 않아 더욱 위험</strong>하다.</p>
+<br>
+<h4 id="dom-xss-payload-추가-테스트">DOM XSS Payload 추가 테스트<a hidden class="anchor" aria-hidden="true" href="#dom-xss-payload-추가-테스트">#</a></h4>
+<p>추가로 DOM 환경에서도 잘 실행되는 Payload들을 테스트했다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&#34;&gt;&lt;<span style="color:#f92672">img</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">x</span> <span style="color:#a6e22e">onerror</span><span style="color:#f92672">=</span><span style="color:#e6db74">alert(&#39;HACKED&#39;)</span>&gt;
+</span></span></code></pre></div><p>또는 DOM 기반에서 자주 쓰는 이벤트 기반 스크립트도 작동한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&#34;</span> <span style="color:#a6e22e">autofocus</span> <span style="color:#a6e22e">onfocus</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p>이 구조가 특히 위험한 이유는:</p>
+<ul>
+<li>사용자가 <strong>클릭하지 않아도</strong>,</li>
+<li>공격자가 만든 URL을 보거나 자동 리디렉션만 되어도,</li>
+</ul>
+<p>Payload가 실행되므로 피싱, 쿠키 탈취에 악용되기 쉽다.</p>
+<br>
+<h4 id="dom-xss-코드-분석">DOM XSS 코드 분석<a hidden class="anchor" aria-hidden="true" href="#dom-xss-코드-분석">#</a></h4>
+<p>DOM XSS는 기본적으로 아래와 같은 JS 구문에서 발생한다:</p>
+<h4 id="innerhtml-위험">innerHTML (위험)<a hidden class="anchor" aria-hidden="true" href="#innerhtml-위험">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">userInput</span>;
+</span></span></code></pre></div><h4 id="documentwrite-매우-위험">document.write (매우 위험)<a hidden class="anchor" aria-hidden="true" href="#documentwrite-매우-위험">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>document.<span style="color:#a6e22e">write</span>(<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">hash</span>);
+</span></span></code></pre></div><h4 id="locationsearch--hash-값을-직접-파싱하는-경우">location.search / hash 값을 직접 파싱하는 경우<a hidden class="anchor" aria-hidden="true" href="#locationsearch--hash-값을-직접-파싱하는-경우">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">lang</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">search</span>.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#34;=&#34;</span>)[<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;lang&#34;</span>).<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">lang</span>;
+</span></span></code></pre></div><ul>
+<li>DOM XSS는 <strong>innerHTML</strong> + <strong>location 파라미터 사용</strong> 조합이 핵심 위험 요소다.</li>
+</ul>
+<br>
+<h4 id="dom-xss-핵심-정리">DOM XSS 핵심 정리<a hidden class="anchor" aria-hidden="true" href="#dom-xss-핵심-정리">#</a></h4>
+<blockquote>
+<p><strong>DOM XSS는 서버 사이드가 아닌 클라이언트 사이드에서 발생한다.</strong>
+서버는 Payload를 전혀 처리하지 않지만, 브라우저는 DOM을 조작하며 스크립트를 실행한다.</p>
+</blockquote>
+<p>따라서 방어 방법도 크게 다르다:</p>
+<ul>
+<li><code>innerHTML</code> 보다는 <code>textContent</code>, <code>innerText</code></li>
+<li>DOMPurify 같은 sanitizer 이용</li>
+<li>location 파라미터 직접 사용 금지
+<br><br></li>
+</ul>
+<hr>
+<h2 id="2-medium---high-단계-실습">2. Medium -&gt; High 단계 실습<a hidden class="anchor" aria-hidden="true" href="#2-medium---high-단계-실습">#</a></h2>
+<h3 id="reflected-xss-medium--high">Reflected XSS (Medium &amp; High)<a hidden class="anchor" aria-hidden="true" href="#reflected-xss-medium--high">#</a></h3>
+<h4 id="구조-분석">구조 분석<a hidden class="anchor" aria-hidden="true" href="#구조-분석">#</a></h4>
+<p>구조를 확인하기 위해 Reflected XSS의 모든 단계 소스 코드를 비교 분석 해보았다.</p>
+<blockquote>
+<p><strong>Low</strong></p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;?</span><span style="color:#a6e22e">php</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">header</span> (<span style="color:#e6db74">&#34;X-XSS-Protection: 0&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Is there any input?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">array_key_exists</span>( <span style="color:#e6db74">&#34;name&#34;</span>, $_GET ) <span style="color:#f92672">&amp;&amp;</span> $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] <span style="color:#f92672">!=</span> <span style="color:#66d9ef">NULL</span> ) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Feedback for end user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">echo</span> <span style="color:#e6db74">&#39;&lt;pre&gt;Hello &#39;</span> <span style="color:#f92672">.</span> $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;&lt;/pre&gt;&#39;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">?&gt;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Low 단계의 소스 코드를 살펴보면 <code>$_GET['name']</code>값을 아무런 검증 없이 그대로 출력한다. <br>
+따라서 <code>&lt;script&gt;</code>, <code>&lt;img&gt;</code>, <code>&lt;svg&gt;</code>등 모든 태그가 실행 가능하다.<br><br></p>
+<blockquote>
+<p><strong>Medium</strong></p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;?</span><span style="color:#a6e22e">php</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">header</span> (<span style="color:#e6db74">&#34;X-XSS-Protection: 0&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Is there any input?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">array_key_exists</span>( <span style="color:#e6db74">&#34;name&#34;</span>, $_GET ) <span style="color:#f92672">&amp;&amp;</span> $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] <span style="color:#f92672">!=</span> <span style="color:#66d9ef">NULL</span> ) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Get input
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $name <span style="color:#f92672">=</span> <span style="color:#a6e22e">str_replace</span>( <span style="color:#e6db74">&#39;&lt;script&gt;&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Feedback for end user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">echo</span> <span style="color:#e6db74">&#34;&lt;pre&gt;Hello </span><span style="color:#e6db74">{</span>$name<span style="color:#e6db74">}</span><span style="color:#e6db74">&lt;/pre&gt;&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">?&gt;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Medium 단계의 소스 코드에서는 <code>&lt;script&gt;</code>문자열과 정확하게 일치하는 경우에만 제거를 하는 검증이 하나 추가되었다. <br></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span>$name <span style="color:#f92672">=</span> <span style="color:#a6e22e">str_replace</span>( <span style="color:#e6db74">&#39;&lt;script&gt;&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] );
+</span></span></code></pre></div><p>하지만 이도 매우 취약하다. <code>&lt;Script&gt;</code>, <code>&lt;img&gt;</code>, <code>&lt;svg&gt;</code>등 대문자로 바꾸거나 이벤트 기반의 태그로 너무 쉽게 우회가 가능하다.<br><br></p>
+<blockquote>
+<p><strong>High</strong></p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;?</span><span style="color:#a6e22e">php</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">header</span> (<span style="color:#e6db74">&#34;X-XSS-Protection: 0&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Is there any input?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">array_key_exists</span>( <span style="color:#e6db74">&#34;name&#34;</span>, $_GET ) <span style="color:#f92672">&amp;&amp;</span> $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] <span style="color:#f92672">!=</span> <span style="color:#66d9ef">NULL</span> ) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Get input
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $name <span style="color:#f92672">=</span> <span style="color:#a6e22e">preg_replace</span>( <span style="color:#e6db74">&#39;/&lt;(.*)s(.*)c(.*)r(.*)i(.*)p(.*)t/i&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, $_GET[ <span style="color:#e6db74">&#39;name&#39;</span> ] );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Feedback for end user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">echo</span> <span style="color:#e6db74">&#34;&lt;pre&gt;Hello </span><span style="color:#e6db74">{</span>$name<span style="color:#e6db74">}</span><span style="color:#e6db74">&lt;/pre&gt;&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">?&gt;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>High 단계의 소스 코드에서는 정규식 기반 필터링이 적용되었다. <code>&lt;script&gt;</code>문자열을 <code>&lt;scriiiipt&gt;</code>, <code>&lt;sCrIpT&gt;</code>와 같은 다양한 형태를 검증하여 제거한다. <br></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#a6e22e">preg_replace</span>(<span style="color:#e6db74">&#39;/&lt;(.*)s(.*)c(.*)r(.*)i(.*)p(.*)t/i&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>, $input)
+</span></span></code></pre></div><p>하지만 이 또한 <code>&lt;script&gt;</code>태그만 검증하기 때문에 다른 태그들을 이용하여 우회가 가능하다.</p>
+<br>
+<h4 id="공격-시도-3">공격 시도<a hidden class="anchor" aria-hidden="true" href="#공격-시도-3">#</a></h4>
+<p>Payload를 찾아보며 알게된 가장 짧고 간단하지만 <code>&lt;script&gt;</code>태그를 사용하지 않고 잘 검증하지 않는 태그를 사용하는 Payload로 공격시도를 해보았다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">&#34;</span><span style="color:#f92672">&gt;&lt;</span><span style="color:#a6e22e">svg</span> <span style="color:#a6e22e">onload</span><span style="color:#f92672">=</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;HACKED&#39;</span>)<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p>Medium &amp; High 단계 모두 공격에 성공하였다.</p>
+<br>
+<h4 id="분석">분석<a hidden class="anchor" aria-hidden="true" href="#분석">#</a></h4>
+<p>단계가 올라갈수록 필터가 강화되는 것처럼 보이지만, 결국 <code>&lt;script&gt;</code>태그만 검증하는 매우 취약한 필터링에 머물러 있다.
+실제 공격은 <code>&lt;svg onload&gt;</code>, <code>&lt;img onerror&gt;</code>, 이벤트 기반 Payload등 다양한 벡터를 활용하므로 대부분 간단하게 우회가 가능했다.
+이를 통해 **간단한 필터링으로는 XSS를 막을 수 없다&quot;는 점을 확인할 수 있었다.</p>
+<br>
+<hr>
+<h3 id="stored-xss-medium--high">Stored XSS (Medium &amp; High)<a hidden class="anchor" aria-hidden="true" href="#stored-xss-medium--high">#</a></h3>
+<h4 id="구조-분석-1">구조 분석<a hidden class="anchor" aria-hidden="true" href="#구조-분석-1">#</a></h4>
 
 
   </div>
