@@ -1,6 +1,6 @@
 +++
 date = '2025-11-18T17:24:56+09:00'
-draft = true
+draft = false
 title = '1주차 : 실습 환경 구축'
 author = "신승환"
 keywords = ["1st", "dvwa", "web"]
